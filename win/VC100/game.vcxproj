@@ -412,6 +412,8 @@
     <ClCompile Include="..\..\src\game\Item.cpp" />
     <ClCompile Include="..\..\src\game\ItemEnchantmentMgr.cpp" />
     <ClCompile Include="..\..\src\game\ItemHandler.cpp" />
+    <ClCompile Include="..\..\src\game\Kingdom.cpp" />
+    <ClCompile Include="..\..\src\game\KingdomMgr.cpp" />
     <ClCompile Include="..\..\src\game\Level0.cpp" />
     <ClCompile Include="..\..\src\game\Level1.cpp" />
     <ClCompile Include="..\..\src\game\Level2.cpp" />
@@ -560,6 +562,8 @@
     <ClInclude Include="..\..\src\game\Item.h" />
     <ClInclude Include="..\..\src\game\ItemEnchantmentMgr.h" />
     <ClInclude Include="..\..\src\game\ItemPrototype.h" />
+    <ClCompile Include="..\..\src\game\Kingdom.h" />
+    <ClCompile Include="..\..\src\game\KingdomMgr.h" />
     <ClInclude Include="..\..\src\game\Language.h" />
     <ClInclude Include="..\..\src\game\LootMgr.h" />
     <ClInclude Include="..\..\src\game\Mail.h" />

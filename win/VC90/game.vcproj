@@ -1595,6 +1595,26 @@
 				>
 			</File>
 		</Filter>
+		<Filter
+			Name="Kingdom"
+			>
+			<File
+				RelativePath="..\..\src\game\Kingdom.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\Kingdom.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\KingdomMgr.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\KingdomMgr.h"
+				>
+			</File>
+		</Filter>		
 		<File
 			RelativePath="..\..\src\game\pchdef.cpp"
 			>

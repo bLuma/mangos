@@ -62,6 +62,7 @@
 #include "WaypointManager.h"
 #include "GMTicketMgr.h"
 #include "Util.h"
+#include "KingdomMgr.h"
 
 INSTANTIATE_SINGLETON_1( World );
 
@@ -1426,6 +1427,9 @@ void World::SetInitialWorldSettings()
     sLog.outString( "Initializing Scripts..." );
     if(!LoadScriptingModule())
         exit(1);
+		
+    sLog.outString("Nacitam data kralovstvi...");
+    kingdommgr.LoadFromDB();		
 
     ///- Initialize game time and timers
     sLog.outString( "DEBUG:: Initialize game time and timers" );

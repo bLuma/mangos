@@ -45,6 +45,7 @@
 #include "Path.h"
 #include "Traveller.h"
 #include "VMapFactory.h"
+#include "KingdomMgr.h"
 
 #include <math.h>
 
@@ -555,12 +556,16 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
     if (health <= damage)
     {
         DEBUG_LOG("DealDamage: victim just died");
-
+		
         if (pVictim->GetTypeId() == TYPEID_PLAYER)
             ((Player*)pVictim)->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_TOTAL_DAMAGE_RECEIVED, health);
 
         // find player: owner of controlled `this` or `this` itself maybe
         Player *player = GetCharmerOrOwnerPlayerOrPlayerItself();
+
+        // pri smrti majordoma najdi napadene kralovstvi a zmen stav
+        if (pVictim->GetTypeId() == TYPEID_UNIT && (((Creature*)pVictim)->GetCreatureInfo()->flags_extra & CREATURE_FLAG_EXTRA_MAJORDOMO))
+            kingdommgr.MajordomoDied(((Creature*)pVictim)->GetDBTableGUIDLow(), player);		
 
         if(pVictim->GetTypeId() == TYPEID_UNIT && ((Creature*)pVictim)->GetLootRecipient())
             player = ((Creature*)pVictim)->GetLootRecipient();

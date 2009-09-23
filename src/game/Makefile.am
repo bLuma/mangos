@@ -158,6 +158,10 @@ libmangosgame_a_SOURCES = \
 	ItemEnchantmentMgr.h \
 	ItemHandler.cpp \
 	ItemPrototype.h \
+	Kingdom.cpp \
+	Kingdom.h \
+	KingdomMgr.cpp \
+	KingdomMgr.h \
 	Language.h \
 	Level0.cpp \
 	Level1.cpp \
