@@ -7,7 +7,7 @@
 #include "Player.h"
 
 // interni oznaceni hordy a aliance
-enum KingdomTeams 
+enum KingdomTeams
 {
     KINGDOM_TEAM_ALLIANCE = 0,
     KINGDOM_TEAM_HORDE = 1,
@@ -23,25 +23,26 @@ typedef KingdomCreatureList::iterator KingdomCLIterator;
 typedef std::set<uint32> KingdomGameObjectList;
 typedef KingdomGameObjectList::iterator KingdomGLIterator;
 
-class Kingdom 
+class Kingdom
 {
     public:
-        Kingdom();
+        Kingdom(uint32 id, uint8 defaultOwner, std::string name);
         ~Kingdom();
-        void LoadFromDB(uint32 id, uint8 defaultOwner);
-        
-        uint8 GetEnemyTeam() 
-        { 
-            if (m_currentOwner == KINGDOM_TEAM_NEUTRAL) 
-                return KINGDOM_TEAM_NEUTRAL; 
+        void LoadFromDB();
+
+        uint8 GetEnemyTeam()
+        {
+            if (m_currentOwner == KINGDOM_TEAM_NEUTRAL)
+                return KINGDOM_TEAM_NEUTRAL;
             return (m_currentOwner == KINGDOM_TEAM_ALLIANCE ? KINGDOM_TEAM_HORDE : KINGDOM_TEAM_ALLIANCE); 
         }
         // zajmuti kralovstvi - zmena spawnu, ulozeni do db
         void Capture(uint8 team);
         void Capture();
-       
+
         // obsahuje toto kralovstvi jednotku s guid ?
         bool HasUnit(uint32 guid);
+        bool HasActiveUnit(uint32 guid);
 
     protected:
         // spawn/despawn npc
@@ -65,6 +66,9 @@ class Kingdom
         uint8 m_currentOwner;
         // soucastny vlatnik
         uint8 m_defaultOwner;
+
+        // nazev kralovstvi
+        std::string m_name;
 
         // guid sesznamy npc a gameobjektu
         // todo?: presunout do array

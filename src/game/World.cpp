@@ -1427,9 +1427,9 @@ void World::SetInitialWorldSettings()
     sLog.outString( "Initializing Scripts..." );
     if(!LoadScriptingModule())
         exit(1);
-		
+
     sLog.outString("Nacitam data kralovstvi...");
-    kingdommgr.LoadFromDB();		
+    kingdommgr.LoadFromDB();
 
     ///- Initialize game time and timers
     sLog.outString( "DEBUG:: Initialize game time and timers" );

@@ -778,6 +778,9 @@ enum MangosStrings
     //                                    10000-10999
 
     // Use for custom patches             11000-11999
+    LANG_KINGDOM_ALLIANCE_TAKEN         = 11800,
+    LANG_KINGDOM_HORDE_TAKEN            = 11801,
+    LANG_KINGDOM_NEUTRAL_TAKEN          = 11802,
 
     // NOT RESERVED IDS                   12000-1999999999
     // `db_script_string` table index     2000000000-2000009999 (MIN_DB_SCRIPT_STRING_ID-MAX_DB_SCRIPT_STRING_ID)

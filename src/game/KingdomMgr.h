@@ -22,7 +22,6 @@ class KingdomMgr {
     private:
         // seznam kralovstvi
         KingdomList m_kingdoms;
-
 };
 
 // definice zkraceneho volani singletonu

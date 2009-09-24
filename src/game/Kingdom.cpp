@@ -2,10 +2,13 @@
 #include "ObjectMgr.h"
 #include "World.h"
 #include "MapManager.h"
+#include "Language.h"
 
-Kingdom::Kingdom() { }
+Kingdom::Kingdom(uint32 id, uint8 defaultOwner, std::string name) : m_id(id), m_defaultOwner(defaultOwner), m_name(name)
+{
+}
 
-Kingdom::~Kingdom() 
+Kingdom::~Kingdom()
 {
     m_allianceSpawns.clear();
     m_hordeSpawns.clear();
@@ -15,22 +18,19 @@ Kingdom::~Kingdom()
     m_neutralObjects.clear();
 }
 
-void Kingdom::LoadFromDB(uint32 id, uint8 defaultOwner) 
+void Kingdom::LoadFromDB()
 {
-    m_id = id;
-    m_defaultOwner = defaultOwner;
-
     QueryResult* result = CharacterDatabase.PQuery("SELECT team FROM kingdom WHERE kid = %u", m_id);
-    if (!result) 
+    if (!result)
     {
-        m_currentOwner = defaultOwner;
-    } 
-    else 
+        m_currentOwner = m_defaultOwner;
+    }
+    else
     {
         Field* f = result->Fetch();
 
         m_currentOwner = f[0].GetUInt8();
-        if (m_currentOwner >= KINGDOM_TEAM_MAX) 
+        if (m_currentOwner >= KINGDOM_TEAM_MAX)
         {
             m_currentOwner = m_defaultOwner;
             sLog.outError("Neplatny tym u kralovstvi %u, resetovan na zakladni!", m_id);
@@ -78,7 +78,7 @@ void Kingdom::LoadFromDB(uint32 id, uint8 defaultOwner)
 
         delete gameobjectResult;
     }
-  
+
     SpawnDespawn(m_currentOwner, true);
     SpawnDespawnObject(m_currentOwner, true);
 }
@@ -217,6 +217,13 @@ void Kingdom::Capture(uint8 team)
     // zapsani do db
     CharacterDatabase.PExecute("DELETE FROM kingdom WHERE kid = %u", m_id);
     CharacterDatabase.PExecute("INSERT INTO kingdom VALUES (%u, %u)", m_id, m_currentOwner);
+
+    // pokud nazev neni prazdny
+    if (!m_name.empty())
+    {
+        // odesli globalni announce o zabrani kralovstvi
+        sWorld.SendWorldText(LANG_KINGDOM_ALLIANCE_TAKEN + team, m_name.c_str());
+    }
 }
 
 bool Kingdom::HasUnit(uint32 guid)
@@ -236,11 +243,22 @@ bool Kingdom::HasUnit(uint32 guid)
     return false;
 }
 
+bool Kingdom::HasActiveUnit(uint32 guid)
+{
+    KingdomCreatureList& list = GetCreatureListByTeam(m_currentOwner);
+
+    KingdomCLIterator it = list.find(guid);
+    if (it != list.end())
+        return true;
+
+    return false;
+}
+
 KingdomCreatureList& Kingdom::GetCreatureListByTeam(uint8 team)
 {
     switch (team)
     {
-        case KINGDOM_TEAM_ALLIANCE: 
+        case KINGDOM_TEAM_ALLIANCE:
             return m_allianceSpawns;
         case KINGDOM_TEAM_HORDE:
             return m_hordeSpawns;
@@ -256,7 +274,7 @@ KingdomGameObjectList& Kingdom::GetGameObjectListByTeam(uint8 team)
 {
     switch (team)
     {
-        case KINGDOM_TEAM_ALLIANCE: 
+        case KINGDOM_TEAM_ALLIANCE:
             return m_allianceObjects;
         case KINGDOM_TEAM_HORDE:
             return m_hordeObjects;

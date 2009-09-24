@@ -493,6 +493,7 @@ class ChatHandler
         //! Development Commands
         bool HandleSet32Bit(const char* args);
         bool HandleSaveAllCommand(const char* args);
+        bool HandleNpcKingdomCommand(const char* args);
 
         Player*   getSelectedPlayer();
         Creature* getSelectedCreature();
