@@ -23,6 +23,7 @@ class KingdomMgr {
 
         static char TeamToChar(uint8 team);
         static uint8 CharToTeam(char team);
+        static uint32 GetCreatureKidFromDB(uint32 guid);
     private:
         // seznam kralovstvi
         KingdomList m_kingdoms;

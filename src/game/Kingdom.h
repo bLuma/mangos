@@ -45,17 +45,17 @@ class Kingdom
         bool HasActiveUnit(uint32 guid);
 
         void AddNewUnit(uint32 guid, uint8 team);
-        //void DelUnit(uint32 guid);
+        void DelUnit(uint32 guid);
 
     protected:
         // spawn/despawn npc
-        void SpawnDespawn(uint8 team, bool spawn);
-        void SpawnGuid(uint32 guid);
+        void SpawnDespawn(uint8 team, bool spawn, bool forced = false);
+        void SpawnGuid(uint32 guid, bool forced = false);
         void DespawnGuid(uint32 guid);
 
         // spawn/despawn gameobjetu
-        void SpawnDespawnObject(uint8 team, bool spawn);
-        void SpawnObject(uint32 guid);
+        void SpawnDespawnObject(uint8 team, bool spawn, bool forced = false);
+        void SpawnObject(uint32 guid, bool forced = false);
         void DespawnObject(uint32 guid);
 
         KingdomCreatureList& GetCreatureListByTeam(uint8 team);

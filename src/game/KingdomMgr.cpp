@@ -99,3 +99,16 @@ uint8 KingdomMgr::CharToTeam(char team)
         case 'n': case 'N': default: return KINGDOM_TEAM_NEUTRAL;
     }
 }
+
+uint32 KingdomMgr::GetCreatureKidFromDB(uint32 guid)
+{
+    QueryResult* result = WorldDatabase.PQuery("SELECT kid FROM kingdom_creature WHERE guid = %u", guid);
+    if (!result)
+        return 0;
+
+    Field* f = result->Fetch();
+    uint32 kid = f[0].GetUInt32();
+    delete result;
+
+    return kid;
+}

@@ -83,20 +83,20 @@ void Kingdom::LoadFromDB()
     SpawnDespawnObject(m_currentOwner, true);
 }
 
-void Kingdom::SpawnDespawn(uint8 team, bool spawn)
+void Kingdom::SpawnDespawn(uint8 team, bool spawn, bool forced)
 {
     KingdomCreatureList& creatures = GetCreatureListByTeam(team);
 
     for (KingdomCLIterator it = creatures.begin(); it != creatures.end(); it++)
     {
         if (spawn)
-            SpawnGuid(*it);
+            SpawnGuid(*it, forced);
         else
             DespawnGuid(*it);
     }
 }
 
-void Kingdom::SpawnGuid(uint32 guid)
+void Kingdom::SpawnGuid(uint32 guid, bool forced)
 {
     CreatureData const* data = objmgr.GetCreatureData(guid);
     if (data)
@@ -106,7 +106,7 @@ void Kingdom::SpawnGuid(uint32 guid)
         // Spawn if necessary (loaded grids only)
         Map* map = const_cast<Map*>(MapManager::Instance().CreateBaseMap(data->mapid));
         // We use spawn coords to spawn
-        if (!map->Instanceable() && !map->IsRemovalGrid(data->posX, data->posY))
+        if (!map->Instanceable() && (forced || !map->IsRemovalGrid(data->posX, data->posY)))
         {
             Creature* pCreature = new Creature;
             //sLog.outDebug("Spawning creature %u",guid);
@@ -144,21 +144,21 @@ void Kingdom::DespawnGuid(uint32 guid)
     }
 }
 
-void Kingdom::SpawnDespawnObject(uint8 team, bool spawn)
+void Kingdom::SpawnDespawnObject(uint8 team, bool spawn, bool forced)
 {
     KingdomGameObjectList& gameobjects = GetGameObjectListByTeam(team);
 
     for (KingdomGLIterator it = gameobjects.begin(); it != gameobjects.end(); it++)
     {
         if (spawn)
-            SpawnObject(*it);
+            SpawnObject(*it, forced);
         else
             DespawnObject(*it);
     }
 }
 
 
-void Kingdom::SpawnObject(uint32 guid)
+void Kingdom::SpawnObject(uint32 guid, bool forced)
 {
     GameObjectData const* data = objmgr.GetGOData(guid);
     if (data)
@@ -168,7 +168,7 @@ void Kingdom::SpawnObject(uint32 guid)
         // this base map checked as non-instanced and then only existed
         Map* map = const_cast<Map*>(MapManager::Instance().CreateBaseMap(data->mapid));
         // We use current coords to unspawn, not spawn coords since creature can have changed grid
-        if (!map->Instanceable() && !map->IsRemovalGrid(data->posX, data->posY))
+        if (!map->Instanceable() && (forced || !map->IsRemovalGrid(data->posX, data->posY)))
         {
             GameObject* pGameobject = new GameObject;
             //sLog.outDebug("Spawning gameobject %u", guid);
@@ -219,8 +219,10 @@ void Kingdom::Capture(uint8 team)
     m_currentOwner = team;
 
     // spawn novych objektu
-    SpawnDespawn(m_currentOwner, true);
-    SpawnDespawnObject(m_currentOwner, true);
+    // pouzij vynuceneho spawnu do mapy (bug pouze u me, ze aktivni grid prejde do removal ?)
+    // todo: fix it!!
+    SpawnDespawn(m_currentOwner, true, true);
+    SpawnDespawnObject(m_currentOwner, true, true);
 
     // zapsani do db
     CharacterDatabase.PExecute("DELETE FROM kingdom WHERE kid = %u", m_id);
@@ -296,6 +298,9 @@ KingdomGameObjectList& Kingdom::GetGameObjectListByTeam(uint8 team)
 
 void Kingdom::AddNewUnit(uint32 guid, uint8 team)
 {
+    // drop if exists
+    DelUnit(guid);
+
     KingdomCreatureList& list = GetCreatureListByTeam(team);
     list.insert(guid);
 
@@ -303,9 +308,20 @@ void Kingdom::AddNewUnit(uint32 guid, uint8 team)
         DespawnGuid(guid);
 }
 
-/*void Kingdom::DelUnit(uint32 guid)
+void Kingdom::DelUnit(uint32 guid)
 {
-    m_allianceSpawns.erase(guid);
-    m_hordeSpawns.erase(guid);
-    m_neutralSpawns.erase(guid);
-}*/
+    uint8 teams[] = {KINGDOM_TEAM_ALLIANCE, KINGDOM_TEAM_HORDE, KINGDOM_TEAM_NEUTRAL};
+    for (int i = 0; i < 3; i++)
+    {
+        KingdomCreatureList& list = GetCreatureListByTeam(teams[i]);
+
+        if (list.find(guid) != list.end())
+        {
+            list.erase(guid);
+
+            if (m_currentOwner != teams[i])
+                SpawnGuid(guid);
+            return;
+        }
+    }
+}

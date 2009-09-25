@@ -9,7 +9,7 @@ bool ChatHandler::HandleNpcKingdomCommand(const char* args)
     // .npc kingdom <kingdom id> [a/h/n/-]
     // prvni parametr udava kingdom id
     // druhy parametr prislusny tym, bez vyplneni 
-    // odstrani bind creatury na kindgom
+    // odstrani bind creatury na kindgom (lze take pomoci .npc kingdom 0)
     // ! po provedeni prikazu je vyzadovan restart !
     // .npc kingdom
     // uvede aktualni bind creatury na kingdom
@@ -46,10 +46,7 @@ bool ChatHandler::HandleNpcKingdomCommand(const char* args)
 
     uint32 kid = atoi(kidc);
     if (!kid)
-    {
-        PSendSysMessage("Neplatne id kralovstvi");
-        return false;
-    }
+        rest = NULL;
 
     uint32 guid = creature->GetDBTableGUIDLow();
     uint8 team = KINGDOM_TEAM_MAX;
@@ -62,6 +59,11 @@ bool ChatHandler::HandleNpcKingdomCommand(const char* args)
         WorldDatabase.PExecute("INSERT INTO kingdom_creature VALUES (%u,%u,%u)", kid, team, guid);
         if (Kingdom* k = kingdommgr.Get(kid))
             k->AddNewUnit(guid, team);
+    }
+    else
+    {
+        if (Kingdom* k = kingdommgr.Get(KingdomMgr::GetCreatureKidFromDB(guid)))
+            k->DelUnit(guid);
     }
 
     PSendSysMessage("Bind na kralovstvi upraven");
