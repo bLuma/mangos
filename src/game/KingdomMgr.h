@@ -16,9 +16,13 @@ class KingdomMgr {
         // destruktor
         ~KingdomMgr();
 
+        Kingdom* Get(uint32 id);
+
         // event pri zabiti npc s flagem majordoma
         void MajordomoDied(uint32 guid, Player* player);
 
+        static char TeamToChar(uint8 team);
+        static uint8 CharToTeam(char team);
     private:
         // seznam kralovstvi
         KingdomList m_kingdoms;

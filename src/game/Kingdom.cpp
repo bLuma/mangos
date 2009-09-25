@@ -121,9 +121,13 @@ void Kingdom::SpawnGuid(uint32 guid)
                     pCreature->Respawn();
             }
         }
-        return;
     }
-    return;
+    else
+    {
+        WorldDatabase.PExecute("DELETE FROM kingdom_creature WHERE guid = %u", guid);
+        sLog.outError("Creatura %u je prirazena ke kralovstvi, ale neexistuje. Smazano z db!", guid);
+        // todo: drop from std::set
+    }
 }
 
 void Kingdom::DespawnGuid(uint32 guid)
@@ -178,9 +182,13 @@ void Kingdom::SpawnObject(uint32 guid)
                     map->Add(pGameobject);
             }
         }
-        return;
     }
-    return;
+    else
+    {
+        WorldDatabase.PExecute("DELETE FROM kingdom_gameobject WHERE guid = %u", guid);
+        sLog.outError("Gameobject %u je prirazen ke kralovstvi, ale neexistuje. Smazano z db!", guid);
+        // todo: drop from std::set
+    }
 }
 
 void Kingdom::DespawnObject(uint32 guid)
@@ -285,3 +293,19 @@ KingdomGameObjectList& Kingdom::GetGameObjectListByTeam(uint8 team)
             return KingdomGameObjectList();
     }
 }
+
+void Kingdom::AddNewUnit(uint32 guid, uint8 team)
+{
+    KingdomCreatureList& list = GetCreatureListByTeam(team);
+    list.insert(guid);
+
+    if (team != m_currentOwner)
+        DespawnGuid(guid);
+}
+
+/*void Kingdom::DelUnit(uint32 guid)
+{
+    m_allianceSpawns.erase(guid);
+    m_hordeSpawns.erase(guid);
+    m_neutralSpawns.erase(guid);
+}*/

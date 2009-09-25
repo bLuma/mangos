@@ -44,6 +44,9 @@ class Kingdom
         bool HasUnit(uint32 guid);
         bool HasActiveUnit(uint32 guid);
 
+        void AddNewUnit(uint32 guid, uint8 team);
+        //void DelUnit(uint32 guid);
+
     protected:
         // spawn/despawn npc
         void SpawnDespawn(uint8 team, bool spawn);

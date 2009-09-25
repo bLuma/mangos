@@ -642,6 +642,7 @@ void GameObject::DeleteFromDB()
     WorldDatabase.PExecuteLog("DELETE FROM gameobject WHERE guid = '%u'", m_DBTableGuid);
     WorldDatabase.PExecuteLog("DELETE FROM game_event_gameobject WHERE guid = '%u'", m_DBTableGuid);
     WorldDatabase.PExecuteLog("DELETE FROM gameobject_battleground WHERE guid = '%u'", m_DBTableGuid);
+    WorldDatabase.PExecuteLog("DELETE FROM kingdom_gameobject WHERE guid = '%u'", m_DBTableGuid);
 }
 
 GameObjectInfo const *GameObject::GetGOInfo() const

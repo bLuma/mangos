@@ -568,6 +568,12 @@ ChatCommand * ChatHandler::getCommandTable()
         { NULL,             0,                  false, NULL,                                           "", NULL }
     };
 
+    static ChatCommand kingdomCommandTable[] =
+    {
+        { "set",            SEC_ADMINISTRATOR,  false, &ChatHandler::HandleKingdomSetCommand,          "", NULL },
+        { NULL,             0,                  false, NULL,                                           "", NULL }
+    };
+
     static ChatCommand commandTable[] =
     {
         { "account",        SEC_PLAYER,         true,  NULL,                                           "", accountCommandTable  },
@@ -593,6 +599,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "reset",          SEC_ADMINISTRATOR,  true,  NULL,                                           "", resetCommandTable    },
         { "instance",       SEC_ADMINISTRATOR,  true,  NULL,                                           "", instanceCommandTable },
         { "server",         SEC_ADMINISTRATOR,  true,  NULL,                                           "", serverCommandTable   },
+        { "kingdom",        SEC_ADMINISTRATOR,  true,  NULL,                                           "", kingdomCommandTable  },
 
         { "aura",           SEC_ADMINISTRATOR,  false, &ChatHandler::HandleAuraCommand,                "", NULL },
         { "unaura",         SEC_ADMINISTRATOR,  false, &ChatHandler::HandleUnAuraCommand,              "", NULL },

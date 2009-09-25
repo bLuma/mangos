@@ -68,3 +68,34 @@ void KingdomMgr::MajordomoDied(uint32 guid, Player* player)
         }
     }
 }
+
+Kingdom* KingdomMgr::Get(uint32 id)
+{
+    KingdomListIterator it = m_kingdoms.find(id);
+    if (it == m_kingdoms.end())
+        return NULL;
+
+    return it->second;
+}
+
+char KingdomMgr::TeamToChar(uint8 team)
+{
+    switch (team)
+    {
+        case KINGDOM_TEAM_ALLIANCE: return 'a';
+        case KINGDOM_TEAM_HORDE:    return 'h';
+        case KINGDOM_TEAM_NEUTRAL:  return 'n';
+    }
+
+    return '-';
+}
+
+uint8 KingdomMgr::CharToTeam(char team)
+{
+    switch (team)
+    {
+        case 'a': case 'A': return KINGDOM_TEAM_ALLIANCE;
+        case 'h': case 'H': return KINGDOM_TEAM_HORDE;
+        case 'n': case 'N': default: return KINGDOM_TEAM_NEUTRAL;
+    }
+}

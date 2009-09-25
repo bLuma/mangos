@@ -160,6 +160,7 @@ libmangosgame_a_SOURCES = \
 	ItemPrototype.h \
 	Kingdom.cpp \
 	Kingdom.h \
+	KingdomCmds.cpp \
 	KingdomMgr.cpp \
 	KingdomMgr.h \
 	Language.h \

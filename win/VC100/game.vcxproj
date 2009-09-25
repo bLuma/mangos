@@ -413,6 +413,7 @@
     <ClCompile Include="..\..\src\game\ItemEnchantmentMgr.cpp" />
     <ClCompile Include="..\..\src\game\ItemHandler.cpp" />
     <ClCompile Include="..\..\src\game\Kingdom.cpp" />
+    <ClCompile Include="..\..\src\game\KingdomCmds.cpp" />
     <ClCompile Include="..\..\src\game\KingdomMgr.cpp" />
     <ClCompile Include="..\..\src\game\Level0.cpp" />
     <ClCompile Include="..\..\src\game\Level1.cpp" />
