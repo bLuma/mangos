@@ -3,6 +3,7 @@
 #include "World.h"
 #include "MapManager.h"
 #include "Language.h"
+#include "ObjectAccessor.h"
 
 Kingdom::Kingdom(uint32 id, uint8 defaultOwner, std::string name) : m_id(id), m_defaultOwner(defaultOwner), m_name(name)
 {
@@ -83,20 +84,20 @@ void Kingdom::LoadFromDB()
     SpawnDespawnObject(m_currentOwner, true);
 }
 
-void Kingdom::SpawnDespawn(uint8 team, bool spawn, bool forced)
+void Kingdom::SpawnDespawn(uint8 team, bool spawn)
 {
     KingdomCreatureList& creatures = GetCreatureListByTeam(team);
 
     for (KingdomCLIterator it = creatures.begin(); it != creatures.end(); it++)
     {
         if (spawn)
-            SpawnGuid(*it, forced);
+            SpawnGuid(*it);
         else
             DespawnGuid(*it);
     }
 }
 
-void Kingdom::SpawnGuid(uint32 guid, bool forced)
+void Kingdom::SpawnGuid(uint32 guid)
 {
     CreatureData const* data = objmgr.GetCreatureData(guid);
     if (data)
@@ -106,7 +107,7 @@ void Kingdom::SpawnGuid(uint32 guid, bool forced)
         // Spawn if necessary (loaded grids only)
         Map* map = const_cast<Map*>(MapManager::Instance().CreateBaseMap(data->mapid));
         // We use spawn coords to spawn
-        if (!map->Instanceable() && (forced || !map->IsRemovalGrid(data->posX, data->posY)))
+        if (!map->Instanceable() && map->IsLoaded(data->posX, data->posY))
         {
             Creature* pCreature = new Creature;
             //sLog.outDebug("Spawning creature %u",guid);
@@ -136,7 +137,7 @@ void Kingdom::DespawnGuid(uint32 guid)
     {
         objmgr.RemoveCreatureFromGrid(guid, data);
 
-        if (Creature* pCreature = ObjectAccessor::Instance().GetObjectInWorld(MAKE_NEW_GUID(guid, data->id, HIGHGUID_UNIT), (Creature*)NULL))
+        if (Creature* pCreature = ObjectAccessor::Instance().GetCreatureInWorld(MAKE_NEW_GUID(guid, data->id, HIGHGUID_UNIT)))
         {
             pCreature->ForcedDespawn();
             pCreature->AddObjectToRemoveList();
@@ -144,21 +145,21 @@ void Kingdom::DespawnGuid(uint32 guid)
     }
 }
 
-void Kingdom::SpawnDespawnObject(uint8 team, bool spawn, bool forced)
+void Kingdom::SpawnDespawnObject(uint8 team, bool spawn)
 {
     KingdomGameObjectList& gameobjects = GetGameObjectListByTeam(team);
 
     for (KingdomGLIterator it = gameobjects.begin(); it != gameobjects.end(); it++)
     {
         if (spawn)
-            SpawnObject(*it, forced);
+            SpawnObject(*it);
         else
             DespawnObject(*it);
     }
 }
 
 
-void Kingdom::SpawnObject(uint32 guid, bool forced)
+void Kingdom::SpawnObject(uint32 guid)
 {
     GameObjectData const* data = objmgr.GetGOData(guid);
     if (data)
@@ -168,7 +169,7 @@ void Kingdom::SpawnObject(uint32 guid, bool forced)
         // this base map checked as non-instanced and then only existed
         Map* map = const_cast<Map*>(MapManager::Instance().CreateBaseMap(data->mapid));
         // We use current coords to unspawn, not spawn coords since creature can have changed grid
-        if (!map->Instanceable() && (forced || !map->IsRemovalGrid(data->posX, data->posY)))
+        if (!map->Instanceable() && map->IsLoaded(data->posX, data->posY))
         {
             GameObject* pGameobject = new GameObject;
             //sLog.outDebug("Spawning gameobject %u", guid);
@@ -197,7 +198,7 @@ void Kingdom::DespawnObject(uint32 guid)
     {
         objmgr.RemoveGameobjectFromGrid(guid, data);
 
-        if (GameObject* pGameobject = ObjectAccessor::Instance().GetObjectInWorld(MAKE_NEW_GUID(guid, data->id, HIGHGUID_GAMEOBJECT), (GameObject*)NULL))
+        if (GameObject* pGameobject = ObjectAccessor::Instance().GetGameObjectInWorld(MAKE_NEW_GUID(guid, data->id, HIGHGUID_GAMEOBJECT)))
             pGameobject->AddObjectToRemoveList();
     }
 }
@@ -219,10 +220,8 @@ void Kingdom::Capture(uint8 team)
     m_currentOwner = team;
 
     // spawn novych objektu
-    // pouzij vynuceneho spawnu do mapy (bug pouze u me, ze aktivni grid prejde do removal ?)
-    // todo: fix it!!
-    SpawnDespawn(m_currentOwner, true, true);
-    SpawnDespawnObject(m_currentOwner, true, true);
+    SpawnDespawn(m_currentOwner, true);
+    SpawnDespawnObject(m_currentOwner, true);
 
     // zapsani do db
     CharacterDatabase.PExecute("DELETE FROM kingdom WHERE kid = %u", m_id);

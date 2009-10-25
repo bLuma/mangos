@@ -49,13 +49,13 @@ class Kingdom
 
     protected:
         // spawn/despawn npc
-        void SpawnDespawn(uint8 team, bool spawn, bool forced = false);
-        void SpawnGuid(uint32 guid, bool forced = false);
+        void SpawnDespawn(uint8 team, bool spawn);
+        void SpawnGuid(uint32 guid);
         void DespawnGuid(uint32 guid);
 
         // spawn/despawn gameobjetu
-        void SpawnDespawnObject(uint8 team, bool spawn, bool forced = false);
-        void SpawnObject(uint32 guid, bool forced = false);
+        void SpawnDespawnObject(uint8 team, bool spawn);
+        void SpawnObject(uint32 guid);
         void DespawnObject(uint32 guid);
 
         KingdomCreatureList& GetCreatureListByTeam(uint8 team);
