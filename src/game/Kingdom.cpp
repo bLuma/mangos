@@ -99,13 +99,13 @@ void Kingdom::SpawnDespawn(uint8 team, bool spawn)
 
 void Kingdom::SpawnGuid(uint32 guid)
 {
-    CreatureData const* data = objmgr.GetCreatureData(guid);
+    CreatureData const* data = sObjectMgr.GetCreatureData(guid);
     if (data)
     {
-        objmgr.AddCreatureToGrid(guid, data);
+        sObjectMgr.AddCreatureToGrid(guid, data);
 
         // Spawn if necessary (loaded grids only)
-        Map* map = const_cast<Map*>(mapmgr.CreateBaseMap(data->mapid));
+        Map* map = const_cast<Map*>(sMapMgr.CreateBaseMap(data->mapid));
         // We use spawn coords to spawn
         if (!map->Instanceable() && map->IsLoaded(data->posX, data->posY))
         {
@@ -133,11 +133,11 @@ void Kingdom::SpawnGuid(uint32 guid)
 
 void Kingdom::DespawnGuid(uint32 guid)
 {
-    if (CreatureData const* data = objmgr.GetCreatureData(guid))
+    if (CreatureData const* data = sObjectMgr.GetCreatureData(guid))
     {
-        objmgr.RemoveCreatureFromGrid(guid, data);
+        sObjectMgr.RemoveCreatureFromGrid(guid, data);
 
-        if (Creature* pCreature = objaccessor.GetCreatureInWorld(MAKE_NEW_GUID(guid, data->id, HIGHGUID_UNIT)))
+        if (Creature* pCreature = sObjectAccessor.GetCreatureInWorld(MAKE_NEW_GUID(guid, data->id, HIGHGUID_UNIT)))
         {
             pCreature->ForcedDespawn();
             pCreature->AddObjectToRemoveList();
@@ -161,13 +161,13 @@ void Kingdom::SpawnDespawnObject(uint8 team, bool spawn)
 
 void Kingdom::SpawnObject(uint32 guid)
 {
-    GameObjectData const* data = objmgr.GetGOData(guid);
+    GameObjectData const* data = sObjectMgr.GetGOData(guid);
     if (data)
     {
-        objmgr.AddGameobjectToGrid(guid, data);
+        sObjectMgr.AddGameobjectToGrid(guid, data);
         // Spawn if necessary (loaded grids only)
         // this base map checked as non-instanced and then only existed
-        Map* map = const_cast<Map*>(mapmgr.CreateBaseMap(data->mapid));
+        Map* map = const_cast<Map*>(sMapMgr.CreateBaseMap(data->mapid));
         // We use current coords to unspawn, not spawn coords since creature can have changed grid
         if (!map->Instanceable() && map->IsLoaded(data->posX, data->posY))
         {
@@ -194,11 +194,11 @@ void Kingdom::SpawnObject(uint32 guid)
 
 void Kingdom::DespawnObject(uint32 guid)
 {
-    if (GameObjectData const* data = objmgr.GetGOData(guid))
+    if (GameObjectData const* data = sObjectMgr.GetGOData(guid))
     {
-        objmgr.RemoveGameobjectFromGrid(guid, data);
+        sObjectMgr.RemoveGameobjectFromGrid(guid, data);
 
-        if (GameObject* pGameobject = objaccessor.GetGameObjectInWorld(MAKE_NEW_GUID(guid, data->id, HIGHGUID_GAMEOBJECT)))
+        if (GameObject* pGameobject = sObjectAccessor.GetGameObjectInWorld(MAKE_NEW_GUID(guid, data->id, HIGHGUID_GAMEOBJECT)))
             pGameobject->AddObjectToRemoveList();
     }
 }
