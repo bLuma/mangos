@@ -105,7 +105,7 @@ void Kingdom::SpawnGuid(uint32 guid)
         objmgr.AddCreatureToGrid(guid, data);
 
         // Spawn if necessary (loaded grids only)
-        Map* map = const_cast<Map*>(MapManager::Instance().CreateBaseMap(data->mapid));
+        Map* map = const_cast<Map*>(mapmgr.CreateBaseMap(data->mapid));
         // We use spawn coords to spawn
         if (!map->Instanceable() && map->IsLoaded(data->posX, data->posY))
         {
@@ -137,7 +137,7 @@ void Kingdom::DespawnGuid(uint32 guid)
     {
         objmgr.RemoveCreatureFromGrid(guid, data);
 
-        if (Creature* pCreature = ObjectAccessor::Instance().GetCreatureInWorld(MAKE_NEW_GUID(guid, data->id, HIGHGUID_UNIT)))
+        if (Creature* pCreature = objaccessor.GetCreatureInWorld(MAKE_NEW_GUID(guid, data->id, HIGHGUID_UNIT)))
         {
             pCreature->ForcedDespawn();
             pCreature->AddObjectToRemoveList();
@@ -167,7 +167,7 @@ void Kingdom::SpawnObject(uint32 guid)
         objmgr.AddGameobjectToGrid(guid, data);
         // Spawn if necessary (loaded grids only)
         // this base map checked as non-instanced and then only existed
-        Map* map = const_cast<Map*>(MapManager::Instance().CreateBaseMap(data->mapid));
+        Map* map = const_cast<Map*>(mapmgr.CreateBaseMap(data->mapid));
         // We use current coords to unspawn, not spawn coords since creature can have changed grid
         if (!map->Instanceable() && map->IsLoaded(data->posX, data->posY))
         {
@@ -198,7 +198,7 @@ void Kingdom::DespawnObject(uint32 guid)
     {
         objmgr.RemoveGameobjectFromGrid(guid, data);
 
-        if (GameObject* pGameobject = ObjectAccessor::Instance().GetGameObjectInWorld(MAKE_NEW_GUID(guid, data->id, HIGHGUID_GAMEOBJECT)))
+        if (GameObject* pGameobject = objaccessor.GetGameObjectInWorld(MAKE_NEW_GUID(guid, data->id, HIGHGUID_GAMEOBJECT)))
             pGameobject->AddObjectToRemoveList();
     }
 }
