@@ -137,16 +137,6 @@ enum Target
     TARGET_T_END
 };
 
-enum CastFlags
-{
-    CAST_INTURRUPT_PREVIOUS     = 0x01,                     //Interrupt any spell casting
-    CAST_TRIGGERED              = 0x02,                     //Triggered (this makes spell cost zero mana and have no cast time)
-    CAST_FORCE_CAST             = 0x04,                     //Forces cast even if creature is out of mana or out of range
-    CAST_NO_MELEE_IF_OOM        = 0x08,                     //Prevents creature from entering melee if out of mana or out of range
-    CAST_FORCE_TARGET_SELF      = 0x10,                     //Forces the target to cast this spell on itself
-    CAST_AURA_NOT_PRESENT       = 0x20,                     //Only casts the spell if the target does not have an aura from the spell
-};
-
 enum EventFlags
 {
     EFLAG_REPEATABLE            = 0x01,                     //Event repeats
@@ -594,7 +584,7 @@ class MANGOS_DLL_SPEC CreatureEventAI : public CreatureAI
         inline uint32 GetRandActionParam(uint32 rnd, uint32 param1, uint32 param2, uint32 param3);
         inline int32 GetRandActionParam(uint32 rnd, int32 param1, int32 param2, int32 param3);
         inline Unit* GetTargetByType(uint32 Target, Unit* pActionInvoker);
-        inline Unit* SelectUnit(AttackingTarget target, uint32 position);
+        inline Unit* SelectUnit(AttackingTarget target, uint32 position) const;
 
         void DoScriptText(int32 textEntry, WorldObject* pSource, Unit* target);
         void DoMeleeAttackIfReady();

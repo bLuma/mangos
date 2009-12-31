@@ -358,7 +358,7 @@ const uint32 ItemQualityColors[MAX_ITEM_QUALITY] = {
 #define SPELL_ATTR_EX4_UNK5                       0x00000020            // 5
 #define SPELL_ATTR_EX4_NOT_STEALABLE              0x00000040            // 6 although such auras might be dispellable, they cannot be stolen
 #define SPELL_ATTR_EX4_UNK7                       0x00000080            // 7
-#define SPELL_ATTR_EX4_UNK8                       0x00000100            // 8
+#define SPELL_ATTR_EX4_STACK_DOT_MODIFIER         0x00000100            // 8 no effect on non DoTs?
 #define SPELL_ATTR_EX4_UNK9                       0x00000200            // 9
 #define SPELL_ATTR_EX4_SPELL_VS_EXTEND_COST       0x00000400            // 10 Rogue Shiv have this flag
 #define SPELL_ATTR_EX4_UNK11                      0x00000800            // 11
@@ -445,7 +445,7 @@ const uint32 ItemQualityColors[MAX_ITEM_QUALITY] = {
 #define SPELL_ATTR_EX6_UNK26                      0x04000000            // 26 not set in 3.0.3
 #define SPELL_ATTR_EX6_UNK27                      0x08000000            // 27 not set in 3.0.3
 #define SPELL_ATTR_EX6_UNK28                      0x10000000            // 28 not set in 3.0.3
-#define SPELL_ATTR_EX6_UNK29                      0x20000000            // 29 not set in 3.0.3
+#define SPELL_ATTR_EX6_NO_DMG_PERCENT_MODS        0x20000000            // 29 do not apply damage percent mods (usually in cases where it has already been applied)
 #define SPELL_ATTR_EX6_UNK30                      0x40000000            // 30 not set in 3.0.3
 #define SPELL_ATTR_EX6_UNK31                      0x80000000            // 31 not set in 3.0.3
 
@@ -1194,7 +1194,11 @@ enum GameObjectFlags
     GO_FLAG_TRANSPORT       = 0x00000008,                   //any kind of transport? Object can transport (elevator, boat, car)
     GO_FLAG_UNK1            = 0x00000010,                   //
     GO_FLAG_NODESPAWN       = 0x00000020,                   //never despawn, typically for doors, they just change state
-    GO_FLAG_TRIGGERED       = 0x00000040                    //typically, summoned objects. Triggered by spell or other events
+    GO_FLAG_TRIGGERED       = 0x00000040,                   //typically, summoned objects. Triggered by spell or other events
+    GO_FLAG_UNK_8           = 0x00000080,
+    GO_FLAG_UNK_9           = 0x00000100,                   //? Seen on type 33, possible meaning "destruct in progress"
+    GO_FLAG_UNK_10          = 0x00000200,                   //? Seen on type 33
+    GO_FLAG_UNK_11          = 0x00000400                    //? Seen on type 33, possibly meaning "destructed"
 };
 
 enum TextEmotes
@@ -2438,37 +2442,6 @@ enum DiminishingGroup
     DIMINISHING_LIMITONLY
 };
 
-enum SummonType
-{
-    SUMMON_TYPE_CRITTER     = 41,
-    SUMMON_TYPE_GUARDIAN    = 61,
-    SUMMON_TYPE_TOTEM_SLOT1 = 63,
-    SUMMON_TYPE_WILD        = 64,
-    SUMMON_TYPE_POSESSED    = 65,
-    SUMMON_TYPE_DEMON       = 66,
-    SUMMON_TYPE_SUMMON      = 67,
-    SUMMON_TYPE_TOTEM_SLOT2 = 81,
-    SUMMON_TYPE_TOTEM_SLOT3 = 82,
-    SUMMON_TYPE_TOTEM_SLOT4 = 83,
-    SUMMON_TYPE_TOTEM       = 121,
-    SUMMON_TYPE_UNKNOWN3    = 181,
-    SUMMON_TYPE_UNKNOWN4    = 187,
-    SUMMON_TYPE_UNKNOWN1    = 247,
-    SUMMON_TYPE_CRITTER2    = 407,
-    SUMMON_TYPE_CRITTER3    = 307,
-    SUMMON_TYPE_UNKNOWN5    = 409,
-    SUMMON_TYPE_UNKNOWN2    = 427,
-    SUMMON_TYPE_POSESSED2   = 428,
-    SUMMON_TYPE_QUEST_CRITTER = 487,
-    SUMMON_TYPE_QUEST_WILD  = 587,
-    SUMMON_TYPE_INFERNO     = 711,
-    SUMMON_TYPE_GUARDIAN2   = 713,
-    SUMMON_TYPE_GUARDIAN3   = 1161,
-    SUMMON_TYPE_CREATURE    = 1302,
-    SUMMON_TYPE_ELEMENTAL   = 1561,
-    SUMMON_TYPE_FORCE_OF_NATURE = 1562
-};
-
 enum ResponseCodes
 {
     RESPONSE_SUCCESS                                       = 0x00,
@@ -2666,5 +2639,18 @@ enum PetTameFailureReason
     PETTAME_CANTCONTROLEXOTIC       = 11, // 3.x
     PETTAME_UNKNOWNERROR            = 12
 };
+
+// we need to stick to 1 version or half of the stuff will work for someone
+// others will not and opposite
+// will only support WoW:WotLK 3.2.2a, client build 10505.
+
+#define EXPECTED_MANGOSD_CLIENT_BUILD        {10505, 0}
+
+// max supported expansion level in mangosd
+// NOTE: not set it more that supported by targeted client version with all expansions installed
+// account with expansion > client supported will rejected at connection by client
+// because if client receive unsupported expansion level it think
+// that it not have expansion installed and reject
+#define MAX_EXPANSION 2
 
 #endif

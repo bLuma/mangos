@@ -25,6 +25,7 @@
 #include "Log.h"
 #include "World.h"
 #include "ObjectMgr.h"
+#include "ObjectDefines.h"
 #include "Player.h"
 #include "UpdateMask.h"
 #include "Chat.h"
@@ -54,6 +55,7 @@
 // |color|Htalent:talent_id,rank|h[name]|h|r                              - client, talent icon shift-click
 // |color|Htaxinode:id|h[name]|h|r
 // |color|Htele:id|h[name]|h|r
+// |color|Htitle:id|h[name]|h|r
 // |color|Htrade:spell_id,cur_value,max_value,unk3int,unk3str|h[name]|h|r - client, spellbook profession icon shift-click
 
 bool ChatHandler::load_command_table = true;
@@ -121,6 +123,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "level",          SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleCharacterLevelCommand,      "", NULL },
         { "rename",         SEC_GAMEMASTER,     true,  &ChatHandler::HandleCharacterRenameCommand,     "", NULL },
         { "reputation",     SEC_GAMEMASTER,     true,  &ChatHandler::HandleCharacterReputationCommand, "", NULL },
+        { "titles",         SEC_GAMEMASTER,     true,  &ChatHandler::HandleCharacterTitlesCommand,     "", NULL },
         { NULL,             0,                  false, NULL,                                           "", NULL }
     };
 
@@ -293,6 +296,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "spell",          SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleLookupSpellCommand,         "", NULL },
         { "taxinode",       SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleLookupTaxiNodeCommand,      "", NULL },
         { "tele",           SEC_MODERATOR,      true,  &ChatHandler::HandleLookupTeleCommand,          "", NULL },
+        { "title",          SEC_GAMEMASTER,     true,  &ChatHandler::HandleLookupTitleCommand,         "", NULL },
         { NULL,             0,                  false, NULL,                                           "", NULL }
     };
 
@@ -314,7 +318,6 @@ ChatCommand * ChatHandler::getCommandTable()
         { "faction",        SEC_MODERATOR,      false, &ChatHandler::HandleModifyFactionCommand,       "", NULL },
         { "spell",          SEC_MODERATOR,      false, &ChatHandler::HandleModifySpellCommand,         "", NULL },
         { "tp",             SEC_MODERATOR,      false, &ChatHandler::HandleModifyTalentCommand,        "", NULL },
-        { "titles",         SEC_MODERATOR,      false, &ChatHandler::HandleModifyKnownTitlesCommand,   "", NULL },
         { "mount",          SEC_MODERATOR,      false, &ChatHandler::HandleModifyMountCommand,         "", NULL },
         { "honor",          SEC_MODERATOR,      false, &ChatHandler::HandleModifyHonorCommand,         "", NULL },
         { "rep",            SEC_GAMEMASTER,     false, &ChatHandler::HandleModifyRepCommand,           "", NULL },
@@ -421,6 +424,8 @@ ChatCommand * ChatHandler::getCommandTable()
         { "gameobject_questrelation",    SEC_ADMINISTRATOR, true,  &ChatHandler::HandleReloadGOQuestRelationsCommand,        "", NULL },
         { "gameobject_scripts",          SEC_ADMINISTRATOR, true,  &ChatHandler::HandleReloadGameObjectScriptsCommand,       "", NULL },
         { "gameobject_battleground",     SEC_ADMINISTRATOR, true,  &ChatHandler::HandleReloadBattleEventCommand,             "", NULL },
+        { "gossip_menu",                 SEC_ADMINISTRATOR, true,  &ChatHandler::HandleReloadGossipMenuCommand,              "", NULL },
+        { "gossip_menu_option",          SEC_ADMINISTRATOR, true,  &ChatHandler::HandleReloadGossipMenuOptionCommand,        "", NULL },
         { "item_enchantment_template",   SEC_ADMINISTRATOR, true,  &ChatHandler::HandleReloadItemEnchantementsCommand,       "", NULL },
         { "item_loot_template",          SEC_ADMINISTRATOR, true,  &ChatHandler::HandleReloadLootTemplatesItemCommand,       "", NULL },
         { "item_required_target",        SEC_ADMINISTRATOR, true,  &ChatHandler::HandleReloadItemRequiredTragetCommand,      "", NULL },
@@ -437,7 +442,6 @@ ChatCommand * ChatHandler::getCommandTable()
         { "mangos_string",               SEC_ADMINISTRATOR, true,  &ChatHandler::HandleReloadMangosStringCommand,            "", NULL },
         { "milling_loot_template",       SEC_ADMINISTRATOR, true,  &ChatHandler::HandleReloadLootTemplatesMillingCommand,    "", NULL },
         { "npc_gossip",                  SEC_ADMINISTRATOR, true,  &ChatHandler::HandleReloadNpcGossipCommand,               "", NULL },
-        { "npc_option",                  SEC_ADMINISTRATOR, true,  &ChatHandler::HandleReloadNpcOptionCommand,               "", NULL },
         { "npc_spellclick_spells",       SEC_ADMINISTRATOR, true,  &ChatHandler::HandleReloadSpellClickSpellsCommand,          "",NULL},
         { "npc_trainer",                 SEC_ADMINISTRATOR, true,  &ChatHandler::HandleReloadNpcTrainerCommand,              "", NULL },
         { "npc_vendor",                  SEC_ADMINISTRATOR, true,  &ChatHandler::HandleReloadNpcVendorCommand,               "", NULL },
@@ -552,6 +556,15 @@ ChatCommand * ChatHandler::getCommandTable()
         { NULL,             0,                  false, NULL,                                           "", NULL }
     };
 
+    static ChatCommand titlesCommandTable[] =
+    {
+        { "add",            SEC_GAMEMASTER,     false, &ChatHandler::HandleTitlesAddCommand,           "", NULL },
+        { "current",        SEC_GAMEMASTER,     false, &ChatHandler::HandleTitlesCurrentCommand,       "", NULL },
+        { "remove",         SEC_GAMEMASTER,     false, &ChatHandler::HandleTitlesRemoveCommand,        "", NULL },
+        { "setmask",        SEC_GAMEMASTER,     false, &ChatHandler::HandleTitlesSetMaskCommand,       "", NULL },
+        { NULL,             0,                  false, NULL,                                           "", NULL }
+    };
+
     static ChatCommand unbanCommandTable[] =
     {
         { "account",        SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleUnBanAccountCommand,      "", NULL },
@@ -591,6 +604,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "gobject",        SEC_GAMEMASTER,     false, NULL,                                           "", gobjectCommandTable  },
         { "honor",          SEC_GAMEMASTER,     false, NULL,                                           "", honorCommandTable    },
         { "wp",             SEC_GAMEMASTER,     false, NULL,                                           "", wpCommandTable       },
+        { "titles",         SEC_GAMEMASTER,     false, NULL,                                           "", titlesCommandTable   },
         { "quest",          SEC_ADMINISTRATOR,  false, NULL,                                           "", questCommandTable    },
         { "reload",         SEC_ADMINISTRATOR,  true,  NULL,                                           "", reloadCommandTable   },
         { "list",           SEC_ADMINISTRATOR,  true,  NULL,                                           "", listCommandTable     },
@@ -661,6 +675,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "flusharenapoints",SEC_ADMINISTRATOR, false, &ChatHandler::HandleFlushArenaPointsCommand,    "", NULL },
         { "repairitems",    SEC_GAMEMASTER,     true,  &ChatHandler::HandleRepairitemsCommand,         "", NULL },
         { "waterwalk",      SEC_GAMEMASTER,     false, &ChatHandler::HandleWaterwalkCommand,           "", NULL },
+        { "quit",           SEC_CONSOLE,        true,  &ChatHandler::HandleQuitCommand,                "", NULL },
 
         { NULL,             0,                  false, NULL,                                           "", NULL }
     };
@@ -695,7 +710,7 @@ const char *ChatHandler::GetMangosString(int32 entry) const
 bool ChatHandler::isAvailable(ChatCommand const& cmd) const
 {
     // check security level only for simple  command (without child commands)
-    return m_session->GetSecurity() >= cmd.SecurityLevel;
+    return m_session->GetSecurity() >= (AccountTypes)cmd.SecurityLevel;
 }
 
 bool ChatHandler::HasLowerSecurity(Player* target, uint64 guid, bool strong)
@@ -733,11 +748,11 @@ bool ChatHandler::HasLowerSecurityAccount(WorldSession* target, uint32 target_ac
     if (target)
         target_sec = target->GetSecurity();
     else if (target_account)
-        target_sec = accmgr.GetSecurity(target_account);
+        target_sec = sAccountMgr.GetSecurity(target_account);
     else
         return true;                                        // caller must report error for (target==NULL && target_account==0)
 
-    if (m_session->GetSecurity() < target_sec || (strong && m_session->GetSecurity() <= target_sec))
+    if (m_session->GetSecurity() < target_sec || (strong && (uint32)m_session->GetSecurity() <= target_sec))
     {
         SendSysMessage(LANG_YOURS_SECURITY_IS_LOW);
         SetSentErrorMessage(true);
@@ -1516,7 +1531,7 @@ valid examples:
                             for(uint8 i=LOCALE_koKR; i<MAX_LOCALE; ++i)
                             {
                                 int8 dbIndex = sObjectMgr.GetIndexForLocale(LocaleConstant(i));
-                                if (dbIndex == -1 || il == NULL || dbIndex >= il->Name.size())
+                                if (dbIndex == -1 || il == NULL || (size_t)dbIndex >= il->Name.size())
                                     // using strange database/client combinations can lead to this case
                                     expectedName = linkedItem->Name1;
                                 else

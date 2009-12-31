@@ -40,7 +40,7 @@ char const* petTypeSuffix[MAX_PET_TYPE] =
 Pet::Pet(PetType type) :
 Creature(), m_removed(false), m_petType(type), m_happinessTimer(7500), m_duration(0), m_resetTalentsCost(0),
 m_bonusdamage(0), m_resetTalentsTime(0), m_usedTalentCount(0), m_auraUpdateMask(0), m_loading(false),
-m_declinedname(NULL)
+m_declinedname(NULL), m_petModeFlags(PET_MODE_DEFAULT)
 {
     m_isPet = true;
     m_name = "Pet";
@@ -414,8 +414,7 @@ void Pet::SavePetToDB(PetSaveMode mode)
             << curmana << ", "
             << GetPower(POWER_HAPPINESS) << ", '";
 
-        // save only spell slots from action bar
-        for(uint32 i = ACTION_BAR_INDEX_PET_SPELL_START; i < ACTION_BAR_INDEX_PET_SPELL_END; ++i)
+        for(uint32 i = ACTION_BAR_INDEX_START; i < ACTION_BAR_INDEX_END; ++i)
         {
             ss << uint32(m_charmInfo->GetActionBarEntry(i)->GetType()) << " "
                << uint32(m_charmInfo->GetActionBarEntry(i)->GetAction()) << " ";
@@ -499,7 +498,7 @@ void Pet::Update(uint32 diff)
         {
             // unsummon pet that lost owner
             Unit* owner = GetOwner();
-            if(!owner || (!IsWithinDistInMap(owner, OWNER_MAX_DISTANCE) && (owner->GetCharmGUID() && (owner->GetCharmGUID() != GetGUID()))) || (isControlled() && !owner->GetPetGUID()))
+            if(!owner || (!IsWithinDistInMap(owner, GetMap()->GetVisibilityDistance()) && (owner->GetCharmGUID() && (owner->GetCharmGUID() != GetGUID()))) || (isControlled() && !owner->GetPetGUID()))
             {
                 Remove(PET_SAVE_NOT_IN_SLOT, true);
                 return;
@@ -1882,9 +1881,6 @@ void Pet::CastPetAuras(bool current)
     if(!owner || owner->GetTypeId()!=TYPEID_PLAYER)
         return;
 
-    if(!IsPermanentPetFor((Player*)owner))
-        return;
-
     for(PetAuraSet::const_iterator itr = owner->m_petAuras.begin(); itr != owner->m_petAuras.end();)
     {
         PetAura const* pa = *itr;
@@ -1951,4 +1947,21 @@ void Pet::SynchronizeLevelWithOwner()
         default:
             break;
     }
+}
+
+void Pet::ApplyModeFlags(PetModeFlags mode, bool apply)
+{
+    if (apply)
+        m_petModeFlags = PetModeFlags(m_petModeFlags | mode);
+    else
+        m_petModeFlags = PetModeFlags(m_petModeFlags & ~mode);
+
+    Unit* owner = GetOwner();
+    if(!owner || owner->GetTypeId()!=TYPEID_PLAYER)
+        return;
+
+    WorldPacket data(SMSG_PET_MODE, 12);
+    data << uint64(GetGUID());
+    data << uint32(m_petModeFlags);
+    ((Player*)owner)->GetSession()->SendPacket(&data);
 }
